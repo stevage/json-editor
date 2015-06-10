@@ -263,7 +263,6 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
   },
   build: function() {
     var self = this;
-
     // If the object should be rendered as a table row
     if(this.options.table_row) {
       this.editor_holder = this.container;
@@ -296,28 +295,31 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       this.container.appendChild(this.title);
       this.container.style.position = 'relative';
       
-      // Edit JSON modal
-      this.editjson_holder = this.theme.getModal();
-      this.editjson_textarea = this.theme.getTextareaInput();
-      this.editjson_textarea.style.height = '170px';
-      this.editjson_textarea.style.width = '300px';
-      this.editjson_textarea.style.display = 'block';
-      this.editjson_save = this.getButton('Save','save','Save');
-      this.editjson_save.addEventListener('click',function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        self.saveJSON();
-      });
-      this.editjson_cancel = this.getButton('Cancel','cancel','Cancel');
-      this.editjson_cancel.addEventListener('click',function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        self.hideEditJSON();
-      });
-      this.editjson_holder.appendChild(this.editjson_textarea);
-      this.editjson_holder.appendChild(this.editjson_save);
-      this.editjson_holder.appendChild(this.editjson_cancel);
-      
+      // Edit JSON Buttton disabled
+      var showEditJson = !(this.schema.options && this.schema.options.disable_edit_json || this.jsoneditor.options.disable_edit_json);
+      if (showEditJson) {
+        // Edit JSON modal
+        this.editjson_holder = this.theme.getModal();
+        this.editjson_textarea = this.theme.getTextareaInput();
+        this.editjson_textarea.style.height = '170px';
+        this.editjson_textarea.style.width = '300px';
+        this.editjson_textarea.style.display = 'block';
+        this.editjson_save = this.getButton('Save','save','Save');
+        this.editjson_save.addEventListener('click',function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          self.saveJSON();
+        });
+        this.editjson_cancel = this.getButton('Cancel','cancel','Cancel');
+        this.editjson_cancel.addEventListener('click',function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          self.hideEditJSON();
+        });
+        this.editjson_holder.appendChild(this.editjson_textarea);
+        this.editjson_holder.appendChild(this.editjson_save);
+        this.editjson_holder.appendChild(this.editjson_cancel);
+      }      
       // Manage Properties modal
       this.addproperty_holder = this.theme.getModal();
       this.addproperty_list = document.createElement('div');
@@ -387,10 +389,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
 
       // Control buttons
       this.title_controls = this.theme.getHeaderButtonHolder();
-      this.editjson_controls = this.theme.getHeaderButtonHolder();
+      if (showEditJson) 
+        this.editjson_controls = this.theme.getHeaderButtonHolder();
       this.addproperty_controls = this.theme.getHeaderButtonHolder();
       this.title.appendChild(this.title_controls);
-      this.title.appendChild(this.editjson_controls);
+      if (showEditJson) 
+        this.title.appendChild(this.editjson_controls);
       this.title.appendChild(this.addproperty_controls);
 
       // Show/Hide button
@@ -426,23 +430,16 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       }
       
       // Edit JSON Button
-      this.editjson_button = this.getButton('JSON','edit','Edit JSON');
-      this.editjson_button.addEventListener('click',function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        self.toggleEditJSON();
-      });
-      this.editjson_controls.appendChild(this.editjson_button);
-      this.editjson_controls.appendChild(this.editjson_holder);
-      
-      // Edit JSON Buttton disabled
-      if(this.schema.options && typeof this.schema.options.disable_edit_json !== "undefined") {
-        if(this.schema.options.disable_edit_json) this.editjson_button.style.display = 'none';
+      if (showEditJson) {
+        this.editjson_button = this.getButton('JSON','edit','Edit JSON');
+        this.editjson_button.addEventListener('click',function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          self.toggleEditJSON();
+        });
+        this.editjson_controls.appendChild(this.editjson_button);
+        this.editjson_controls.appendChild(this.editjson_holder);
       }
-      else if(this.jsoneditor.options.disable_edit_json) {
-        this.editjson_button.style.display = 'none';
-      }
-      
       // Object Properties Button
       this.addproperty_button = this.getButton('Properties','edit','Object Properties');
       this.addproperty_button.addEventListener('click',function(e) {
